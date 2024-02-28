@@ -1,0 +1,22 @@
+server:
+  port: 8081
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: product-service
+          uri: ${product-service-route:http://localhost:8080}
+          predicates:
+            - Path=/v1/regions/**
+          filters:
+            - RewritePath=/v1/regions/(?<segment>.*), /api/$\{segment}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 1
+                redis-rate-limiter.burstCapacity: 1
